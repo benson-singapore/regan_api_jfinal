@@ -2,30 +2,52 @@
 
 #### 项目介绍
 jfianl api文档项目
+*** Regan API *** 项目是基于注释自动生成api文档，很大缩短了开始与后期维护API接口文档的时间。*** Regan API *** 利用jdk提供的Doclet
+类读取文档注释，可手动配置需要读取的文件，同时增加了读取过滤指定方法过滤等功能。
+
+#### 文档：[https://regan_jeff.gitee.io/jfinal-api/](https://regan_jeff.gitee.io/jfinal-api/#/)
 
 #### 软件架构
 软件架构说明
-
+*** Regan API *** 基础项目基于[jfinal](http://www.jfinal.com/) 开发，前端基于[飞冰](https://alibaba.github.io/ice)开发的API接口文档管理目录，项目需要引用只需要加入***src下api包下的文件，以及webapp下api目录里的页面***。
 
 #### 安装教程
 
-1. xxxx
-2. xxxx
-3. xxxx
+1. 下载demo项目，执行 ApiConfig 下main方法即可。
 
 #### 使用说明
+1. _引入依赖_
+```xml
+<dependency>
+  <groupId>cn.hutool</groupId>
+  <artifactId>hutool-all</artifactId>
+  <version>4.0.12</version>
+</dependency>
+<dependency>
+  <groupId>com.google.guava</groupId>
+  <artifactId>guava</artifactId>
+  <version>18.0</version>
+</dependency>
+<dependency>
+  <groupId>com.alibaba</groupId>
+  <artifactId>fastjson</artifactId>
+  <version>1.2.9</version>
+</dependency>
+2. 加入 ***src下api包下的文件，以及webapp下api目录里的页面***
+3. jfinal 配置加入api路由
+```java
+/**
+ * 配置路由
+ */
+@Override
+public void configRoute(Routes me) {
+    //配置api路由
+    me.add("/api", ApiController.class);
+}
+```
+4. 项目中注释基础配置，请参考文档。
 
-1. xxxx
-2. xxxx
-3. xxxx
-
-#### 参与贡献
-
-1. Fork 本项目
-2. 新建 Feat_xxx 分支
-3. 提交代码
-4. 新建 Pull Request
-
+5.启动服务访问本地地址：http://localhost:****/api
 
 #### 码云特技
 
