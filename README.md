@@ -5,7 +5,7 @@ jfianl api文档项目
 ***Regan API*** 项目是基于注释自动生成api文档，很大缩短了开始与后期维护API接口文档的时间。***Regan API*** 利用jdk提供的Doclet
 类读取文档注释，可手动配置需要读取的文件，同时增加了读取过滤指定方法过滤等功能。
 
-#### 文档：[https://regan_jeff.gitee.io/jfinal-api/](https://regan_jeff.gitee.io/jfinal-api/#/)
+#### 文档：[https://regan_jeff.gitee.io/jfinal-api/](https://regan_jeff.gitee.io/jfinal-api)
 
 #### 软件架构
 软件架构说明
@@ -51,7 +51,7 @@ public void configRoute(Routes me) {
     me.add("/api", ApiController.class);
 }
 ```
-4. 项目中注释基础配置，请参考文档。
+4. 项目中注释基础配置，请参考[文档](https://regan_jeff.gitee.io/jfinal-api/)。
 
 5.启动服务访问本地地址：http://***/api
 
