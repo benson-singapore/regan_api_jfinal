@@ -55,6 +55,48 @@ public void configRoute(Routes me) {
 
 5.启动服务访问本地地址：http://***/api
 
+** 2.配置文件说明 **
+* 在项目resources 加入 ***api.properties*** 文件，指定解析的包文件。
+```properties
+#解析的controller包 多个用逗号间隔
+packages=com.jfinal.api.controller
+
+#需要过滤的controller 多个用逗号间隔
+filters=UserController 
+```
+** 3.controller注释配置 **
+
+```java
+/**
+ * 用户管理
+ * @action /user
+ * @author zhangby
+ * @date 2018/6/12 下午3:26
+ */
+public class UserController extends Controller{
+    
+}
+```
+** 4.method注释配置 **
+
+```java
+    /**
+     * 用户登录功
+     * @title 登录接口
+     * @param username|用户名|string|必填
+     * @param password|密码|string|必填
+     * @resqParam code|用户名|String|必填
+     * @resqParam data|数据|object|非必填
+     * @resqParam msg|消息信息|String|必填
+     * @respBody {"code":"000","data":"","msg":"success"}
+     * @author zhangby
+     * @date 2018/6/12 下午4:23
+     */
+    public void login() {
+        renderJson(Kv.create().set("code","000"));
+    }
+```
+
 #### 码云特技
 
 1. 使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
