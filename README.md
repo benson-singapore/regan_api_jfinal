@@ -51,11 +51,9 @@ public void configRoute(Routes me) {
     me.add("/api", ApiController.class);
 }
 ```
-4. 项目中注释基础配置，请参考[文档](https://regan_jeff.gitee.io/jfinal-api/)。
+4.启动服务访问本地地址：http://***/api
 
-5.启动服务访问本地地址：http://***/api
-
-** 2.配置文件说明 **
+**2.配置文件说明**
 * 在项目resources 加入 ***api.properties*** 文件，指定解析的包文件。
 ```properties
 #解析的controller包 多个用逗号间隔
@@ -64,7 +62,7 @@ packages=com.jfinal.api.controller
 #需要过滤的controller 多个用逗号间隔
 filters=UserController 
 ```
-** 3.controller注释配置 **
+**3.controller注释配置**
 
 ```java
 /**
@@ -77,7 +75,7 @@ public class UserController extends Controller{
     
 }
 ```
-** 4.method注释配置 **
+**4.method注释配置**
 
 ```java
     /**
