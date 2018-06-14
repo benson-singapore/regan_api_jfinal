@@ -94,4 +94,4 @@ public class UserController extends Controller{
         renderJson(Kv.create().set("code","000"));
     }
 ```
-> 注：如果需要过滤controller中的方法，可在方法上添加 ***@ApiIgnore***注解。
+> 注：如果需要过滤controller中的方法，可在方法上添加 **@ApiIgnore**注解。
