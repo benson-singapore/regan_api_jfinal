@@ -27,4 +27,18 @@ public class UserController extends Controller{
     public void login() {
         renderJson(Kv.create().set("code","000"));
     }
+
+    /**
+     * 用户退出功能
+     * @title 退出接口
+     * @resqParam code|用户名|String|必填
+     * @resqParam data|数据|object|非必填
+     * @resqParam msg|消息信息|String|必填
+     * @respBody {"code":"000","data":"","msg":"success"}
+     * @author zhangby
+     * @date 2018/6/20 上午10:32
+     */
+    public void logout() {
+        renderJson(Kv.create().set("code","000"));
+    }
 }

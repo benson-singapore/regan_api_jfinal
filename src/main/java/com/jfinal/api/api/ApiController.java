@@ -1,8 +1,10 @@
 package com.jfinal.api.api;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -49,7 +51,7 @@ public class ApiController extends Controller {
         List<Kv> menuList = Lists.newArrayList();
         dataMap.values().forEach(dict -> {
             Kv kv = Kv.create()
-                    .set("menuName", StrKit.isBlank(dict.getStr("commentText"))?dict.get("action"):dict.get("commentText"))
+                    .set("menuName", StrKit.isBlank(dict.getStr("commentText")) ? dict.get("action") : dict.get("commentText"))
                     .set("href", dict.get("action"))
                     .set("actionName", dict.get("name"));
             List<Kv> children = Lists.newArrayList();
@@ -57,10 +59,10 @@ public class ApiController extends Controller {
             Convert.convert(Map.class, dict.get("methods")).forEach((k, v) -> {
                 Dict dt = Convert.convert(Dict.class, v);
                 Kv child = Kv.create()
-                        .set("menuName", StrKit.isBlank(dt.getStr("title"))?dt.get("name"):dt.getStr("title"))
+                        .set("menuName", StrKit.isBlank(dt.getStr("title")) ? dt.get("name") : dt.getStr("title"))
                         .set("href", dt.get("name"))
                         .set("methodName", dt.get("name"))
-                        .set("author",dt.get("author"));
+                        .set("author", dt.get("author"));
                 children.add(child);
             });
             kv.set("children", children);
@@ -90,11 +92,132 @@ public class ApiController extends Controller {
             });
         });
         Dict dict = Dict.create()
-                .set("actionNum",actionList.size())
-                .set("methodNum",methodList.size())
-                .set("authorNum",authorList.size())
-                .set("authorList",authorList);
+                .set("actionNum", actionList.size())
+                .set("methodNum", methodList.size())
+                .set("authorNum", authorList.size())
+                .set("authorList", authorList);
         renderText(JSON.toJSONString(dict));
+    }
+
+    /**
+     * 接口贡献度查询
+     *
+     * @author zhangby
+     * @date 2018/6/19 下午6:53
+     */
+    public void getCalendarData() {
+        //调用解析方法
+        Map<String, Dict> dataMap = annotationParse.getApiData4Depth().getApiDataMap();
+        List<Kv> methodAll = Lists.newArrayList();
+        dataMap.values().forEach(dict -> {
+            Convert.convert(Map.class, dict.get("methods")).forEach((k, v) -> {
+                Dict dt = Convert.convert(Dict.class, v);
+                if (StrKit.notBlank(dt.getStr("date"))) {
+                    String api_date = CommUtil.splitStr(dt.getStr("date"), " ").get(0);
+                    methodAll.add(Kv.create()
+                            .set("date", DateUtil.formatDate(CommUtil.parseDate(api_date))));
+                }
+            });
+        });
+        Map<String, Long> date = methodAll.stream()
+                .collect(Collectors.groupingBy(dt -> dt.getStr("date"), Collectors.counting()));
+        List<List<String>> rsList = Lists.newArrayList();
+        date.forEach((k, v) -> rsList.add(Lists.newArrayList(k, v.toString())));
+        renderText(JSON.toJSONString(
+                Kv.create()
+                        .set("date", rsList)
+                        .set("year", Lists.newArrayList(DateUtil.formatDate(new Date()), DateUtil.formatDate(DateUtil.offsetDay(new Date(), -365))))
+        ));
+    }
+
+    /**
+     * 周更新
+     *
+     * @author zhangby
+     * @date 2018/6/20 下午4:25
+     */
+    public void getWeekGroup() {
+        //调用解析方法
+        Map<String, Dict> dataMap = annotationParse.getApiData4Depth().getApiDataMap();
+        List<Kv> methodAll = Lists.newArrayList();
+        dataMap.values().forEach(dict -> {
+            Convert.convert(Map.class, dict.get("methods")).forEach((k, v) -> {
+                Dict dt = Convert.convert(Dict.class, v);
+                if (StrKit.notBlank(dt.getStr("date")) || StrKit.notBlank(dt.getStr("author"))) {
+                    String api_date = CommUtil.splitStr(dt.getStr("date"), " ").get(0);
+                    methodAll.add(Kv.create()
+                            .set("date", DateUtil.formatDate(CommUtil.parseDate(api_date))));
+                }
+            });
+        });
+        Okv weekDate = Okv.create();
+        for (int i = 6; i >= 0; i--) {
+            weekDate.put(DateUtil.formatDate(DateUtil.offsetDay(new Date(), -i)), 0);
+        }
+        methodAll.stream()
+                .filter(kv ->
+                        kv.getStr("date").compareTo(DateUtil.formatDate(new Date())) <= 0 &&
+                                kv.getStr("date").compareTo(DateUtil.formatDate(DateUtil.offsetWeek(new Date(), -1))) >= 0)
+                .collect(Collectors.groupingBy(kv -> kv.getStr("date"), Collectors.counting()))
+                .forEach((k, v) -> weekDate.put(k, v));
+        Kv weekGroup = Kv.create()
+                .set("xAxis", weekDate.keySet())
+                .set("series", weekDate.values());
+
+        renderText(JSON.toJSONString(weekGroup));
+    }
+
+    /**
+     * 模块分组
+     */
+    public void getModelGroup() {
+        //调用解析方法
+        Map<String, Dict> dataMap = annotationParse.getApiData4Depth().getApiDataMap();
+        List<Kv> modelGroup = CommUtil.convers(dataMap.values(), dict ->
+                Kv.create()
+                        .set("name", StrKit.isBlank(dict.getStr("commentText")) ? dict.get("action") : dict.get("commentText"))
+                        .set("value", Convert.convert(Map.class, dict.get("methods")).size()));
+        renderText(JSON.toJSONString(modelGroup));
+    }
+
+
+    /**
+     * 获取接口分组数据 [作者统计]
+     *
+     * @author zhangby
+     * @date 2018/6/20 上午11:49
+     */
+    public void getAuthorGroup() {
+        //调用解析方法
+        Map<String, Dict> dataMap = annotationParse.getApiData4Depth().getApiDataMap();
+        List<Kv> methodAll = Lists.newArrayList();
+        dataMap.values().forEach(dict -> {
+            Convert.convert(Map.class, dict.get("methods")).forEach((k, v) -> {
+                Dict dt = Convert.convert(Dict.class, v);
+                if (StrKit.notBlank(dt.getStr("date")) || StrKit.notBlank(dt.getStr("author"))) {
+                    String api_date = CommUtil.splitStr(dt.getStr("date"), " ").get(0);
+                    methodAll.add(Kv.create()
+                            .set("author", dt.get("author")));
+                }
+            });
+        });
+
+        /** 作者分组 */
+        List<Kv> list = Lists.newArrayList();
+        methodAll.stream()
+                .collect(Collectors.groupingBy(kv -> kv.getStr("author"), Collectors.counting()))
+                .forEach((k, v) -> list.add(Kv.create().set("author", k).set("num", v)));
+        //排序
+        List<Kv> authorGroup = list.stream().sorted((k1, k2) -> -k1.getStr("num").compareTo(k2.getStr("num"))).collect(Collectors.toList());
+        //添加头像
+        List<String> headImgs = Lists.newArrayList(
+                "https://img.alicdn.com/tfs/TB1j159r21TBuNjy0FjXXajyXXa-499-498.png_80x80.jpg",
+                "https://img.alicdn.com/tfs/TB1FGimr1SSBuNjy0FlXXbBpVXa-499-498.png_80x80.jpg",
+                "https://img.alicdn.com/tfs/TB1AdOerVOWBuNjy0FiXXXFxVXa-499-498.png_80x80.jpg");
+        for (int i=0;i<authorGroup.size();i++) {
+            authorGroup.get(i).set("headImg", headImgs.get(i % 3));
+        }
+        renderText(JSON.toJSONString(authorGroup));
     }
 
     /**
@@ -111,8 +234,8 @@ public class ApiController extends Controller {
         if (!dataMap.isEmpty()) {
             Dict actionDict = dataMap.get(getPara("actionName"));
             Dict methodDict = Convert.convert(Dict.class, Convert.convert(Map.class, actionDict.get("methods")).get(getPara("method")));
-            methodTitle.set("title", StrKit.isBlank(methodDict.getStr("title"))?methodDict.get("name"):methodDict.getStr("title"))
-                    .set("actionTitle", StrKit.isBlank(actionDict.getStr("commentText"))?actionDict.get("action"):actionDict.get("commentText"))
+            methodTitle.set("title", StrKit.isBlank(methodDict.getStr("title")) ? methodDict.get("name") : methodDict.getStr("title"))
+                    .set("actionTitle", StrKit.isBlank(actionDict.getStr("commentText")) ? actionDict.get("action") : actionDict.get("commentText"))
                     .set("desc", methodDict.get("commentText"))
                     .set("url", ("/".equals(actionDict.get("action")) ? "" : actionDict.get("action")) + "/" + methodDict.get("name"))
                     .set("respText", ObjectUtil.isNull(methodDict.get("respBody")) ? "{}" : methodDict.get("respBody"))
@@ -159,7 +282,7 @@ public class ApiController extends Controller {
                                 .set("name", keys.get(keys.size() - 1))
                                 .set("desc", splitStr4Temp.get(1))
                                 .set("type", splitStr4Temp.get(2))
-                                .set("required", splitStr4Temp.size()>3?splitStr4Temp.get(3):"")
+                                .set("required", splitStr4Temp.size() > 3 ? splitStr4Temp.get(3) : "")
                 );
             });
         }
@@ -238,7 +361,9 @@ public class ApiController extends Controller {
      * @return
      */
     private String parseApiTableJson(List<String> paramList, BiConsumer<Okv, String> accumulator) {
-        if (ObjectUtil.isNull(paramList) || paramList.isEmpty()) return JSON.toJSONString(Lists.newArrayList());
+        if (ObjectUtil.isNull(paramList) || paramList.isEmpty()) {
+            return JSON.toJSONString(Lists.newArrayList());
+        }
         List<String> sortParamList = paramList.stream().map(p -> p.split("\\|")[0]).sorted().collect(Collectors.toList());
         Okv okv = paramList.stream().collect(Okv::create, accumulator, Okv::putAll);
         List<Kv> list = Lists.newArrayList();

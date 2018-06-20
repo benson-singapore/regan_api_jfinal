@@ -1,6 +1,7 @@
 package com.jfinal.api.conf;
 
 import com.jfinal.api.api.ApiController;
+import com.jfinal.api.controller.MenuController;
 import com.jfinal.api.controller.UserController;
 import com.jfinal.config.*;
 import com.jfinal.core.JFinal;
@@ -54,6 +55,7 @@ public class ApiConfig extends JFinalConfig {
         //配置api路由
         me.add("/api", ApiController.class);
         me.add("/user", UserController.class);
+        me.add("/meun", MenuController.class);
     }
 
     @Override
