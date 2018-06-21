@@ -39,6 +39,16 @@ public class ApiController extends Controller {
     }
 
     /**
+     * 获取主题色，暂时只支持：dark、light
+     *
+     * @author zhangby
+     * @date 2018/6/21 下午2:59
+     */
+    public void getTheme() {
+       renderText(JSON.toJSONString(Kv.create().set("theme",getApiProp().get("theme","dark"))));
+    }
+
+    /**
      * 获取菜单数据
      *
      * @author zhangby
