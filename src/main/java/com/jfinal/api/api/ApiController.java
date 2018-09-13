@@ -395,7 +395,16 @@ public class ApiController extends Controller {
                 list.add(Convert.convert(Kv.class, okv.get(p)));
             }
         });
-        return JSON.toJSONString(list);
+        List<kv> yuanList = Lists.newArrayList();
+        //还原序列
+        paramList.stream().map(p -> p.split("\\|")[0]).forEach(str->{
+            list.forEach(li ->{
+                if (str.equals(li.getStr("name"))) {
+                    yuanList.add(li);
+                }
+            });
+        });
+        return JSON.toJSONString(yuanList);
     }
 
     private static Kv getLastKv(List<Kv> list, List<String> keys) {
