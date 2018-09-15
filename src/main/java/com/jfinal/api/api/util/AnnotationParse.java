@@ -33,7 +33,9 @@ public class AnnotationParse {
     private static AnnotationParse annotationParse;
     //源码路径
     private static final String SRC_PAth = (PathKit.getWebRootPath().contains("/target/classes")?
-            CommUtil.splitStr4Temp(PathKit.getWebRootPath(),"{}/target/classes").get(0): PathKit.getWebRootPath()) + "/src/main/java/";
+            CommUtil.splitStr4Temp(PathKit.getWebRootPath(),"{}/target/classes").get(0):
+            PathKit.getWebRootPath().contains("\\target\\classes")?
+                    CommUtil.splitStr4Temp(PathKit.getWebRootPath(),"{}\\target\\classes").get(0):PathKit.getWebRootPath()) + "/src/main/java/";
     //解析的package
     private List<String> packages = Lists.newArrayList();
     //需要过滤的Controller
